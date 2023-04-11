@@ -12,6 +12,8 @@ build/
 .idea/
 .cache/
 
+.ws/
+
 output0.jpg
 
 output1.jpg

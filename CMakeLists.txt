@@ -26,21 +26,25 @@ set(BUILD_DEMO ON)
 
 if (BUILD_DEMO)
     MESSAGE(STATUS "BUILD DEMO PROJECT")
-    add_subdirectory(demos)
+    add_subdirectory(demos/cpp)
 endif ()
 
+find_package(pybind11 REQUIRED)
 find_package(benchmark REQUIRED)
 find_package(OpenMP REQUIRED)
 find_package(Armadillo REQUIRED)
 find_package(glog REQUIRED)
 find_package(BLAS REQUIRED)
 find_package(LAPACK REQUIRED)
+find_package(OpenCV REQUIRED)
 
 aux_source_directory(./source/data DIR_DATA)
 aux_source_directory(./source/runtime DIR_PARSER)
 aux_source_directory(./source/layer/abstract DIR_ABSTRACT_LAYER)
 aux_source_directory(./source/layer/details DIR_BINOCULAR_LAYER)
 aux_source_directory(./source/parser DIR_PARSER)
+aux_source_directory(./demos/python DIR_TEST_PYBIND)
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 set(link_lib glog::glog)
@@ -50,14 +54,31 @@ ENDIF ()
 
 set(link_math_lib ${ARMADILLO_LIBRARIES} ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
 
-add_library(kuiper SHARED ${DIR_DATA} ${DIR_PARSER} ${DIR_ABSTRACT_LAYER} ${DIR_BINOCULAR_LAYER} ${DIR_PARSER} source/layer/details/platform.hpp)
-target_link_libraries(kuiper ${link_lib} ${link_math_lib} OpenMP::OpenMP_CXX)
+pybind11_add_module(pykuiper ${DIR_DATA} ${DIR_PARSER} ${DIR_ABSTRACT_LAYER} ${DIR_BINOCULAR_LAYER} ${DIR_TEST_PYBIND})
+target_link_libraries(pykuiper PRIVATE ${link_lib})
+target_link_libraries(pykuiper PRIVATE ${link_math_lib})
+target_link_libraries(pykuiper PRIVATE OpenMP::OpenMP_CXX) 
+target_link_libraries(pykuiper PRIVATE ${OpenCV_LIBS})
+target_link_libraries(pykuiper PRIVATE ${pybind11_LIBS})
+
+target_include_directories(pykuiper PUBLIC ${benchmark_INCLUDE_DIRS})
+target_include_directories(pykuiper PUBLIC ${glog_INCLUDE_DIR})
+target_include_directories(pykuiper PUBLIC ${GTest_INCLUDE_DIR})
+target_include_directories(pykuiper PUBLIC ${Armadillo_INCLUDE_DIR})
+target_include_directories(pykuiper PUBLIC ${OpenCV_INCLUDE_DIRS})
+target_include_directories(pykuiper PUBLIC ${pybind11_INCLUDE_DIRS})
+
+add_library(kuiper SHARED ${DIR_DATA} ${DIR_PARSER} ${DIR_ABSTRACT_LAYER} ${DIR_BINOCULAR_LAYER})
+target_link_libraries(kuiper PRIVATE ${link_lib})
+target_link_libraries(kuiper PRIVATE ${link_math_lib})
+target_link_libraries(kuiper PRIVATE OpenMP::OpenMP_CXX) 
+target_link_libraries(kuiper PRIVATE ${OpenCV_LIBS})
 
 target_include_directories(kuiper PUBLIC ${benchmark_INCLUDE_DIRS})
 target_include_directories(kuiper PUBLIC ${glog_INCLUDE_DIR})
 target_include_directories(kuiper PUBLIC ${GTest_INCLUDE_DIR})
 target_include_directories(kuiper PUBLIC ${Armadillo_INCLUDE_DIR})
-
+target_include_directories(kuiper PUBLIC ${OpenCV_INCLUDE_DIRS})
 # mathfun library defines
 add_compile_definitions(SSE_MATHFUN_WITH_CODE USE_SSE_AUTO)
 

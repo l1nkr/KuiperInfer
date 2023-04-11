@@ -13,8 +13,8 @@ else()
 endif()
 
 add_executable(yolo_test yolo_test.cpp image_util.hpp image_util.cpp)
-target_include_directories(yolo_test PUBLIC ../include)
-target_link_directories(yolo_test PUBLIC ${PROJECT_SOURCE_DIR}/lib)
+target_include_directories(yolo_test PUBLIC ../../include)
+# target_link_directories(yolo_test PUBLIC ${PROJECT_SOURCE_DIR}/lib)
 target_link_libraries(yolo_test ${OpenCV_LIBS} kuiper)
 
 if (MSVC)
@@ -27,8 +27,8 @@ endif()
 
 
 add_executable(resnet_test resnet_test.cpp image_util.hpp image_util.cpp)
-target_include_directories(resnet_test PUBLIC ../include)
-target_link_directories(resnet_test PUBLIC ${PROJECT_SOURCE_DIR}/lib)
+target_include_directories(resnet_test PUBLIC ../../include)
+# target_link_directories(resnet_test PUBLIC ${PROJECT_SOURCE_DIR}/lib)
 target_link_libraries(resnet_test ${OpenCV_LIBS} kuiper)
 
 

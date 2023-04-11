@@ -4,11 +4,12 @@
 #include <algorithm>
 #include <cassert>
 #include <opencv2/opencv.hpp>
-#include "../source/layer/details/softmax.hpp"
-#include "data/tensor.hpp"
-#include "runtime/runtime_ir.hpp"
-#include "tick.hpp"
-
+#include "../../source/layer/details/softmax.hpp"
+#include "../../include/data/tensor.hpp"
+#include "../../include/runtime/runtime_ir.hpp"
+#include "../../include/tick.hpp"
+#include <pybind11/pybind11.h>
+#include <iostream>
 // python ref https://pytorch.org/hub/pytorch_vision_resnet/
 kuiper_infer::sftensor PreProcessImage(const cv::Mat& image) {
   using namespace kuiper_infer;
@@ -52,14 +53,14 @@ kuiper_infer::sftensor PreProcessImage(const cv::Mat& image) {
   return input;
 }
 
-int main(int argc, char* argv[]) {
-  if (argc != 2) {
-    printf("usage: ./resnet_test [image path]\n");
-    exit(-1);
-  }
+int test_pybind() {
+  // if (argc != 2) {
+  //   printf("usage: ./resnet_test [image path]\n");
+  //   exit(-1);
+  // }
   using namespace kuiper_infer;
 
-  const std::string& path = argv[1];
+  const std::string& path = "/code/KuiperInfer/imgs/car.jpg";
 
   const uint32_t batch_size = 1;
   std::vector<sftensor> inputs;
@@ -70,8 +71,8 @@ int main(int argc, char* argv[]) {
     inputs.push_back(input);
   }
 
-  const std::string& param_path = "tmp/resnet/demo/resnet18_batch1.pnnx.param";
-  const std::string& weight_path = "tmp/resnet/demo/resnet18_batch1.pnnx.bin";
+  const std::string& param_path = "/code/KuiperInfer/tmp/resnet/demo/resnet18_batch1.pnnx.param";
+  const std::string& weight_path = "/code/KuiperInfer/tmp/resnet/demo/resnet18_batch1.pnnx.bin";
   RuntimeGraph graph(param_path, weight_path);
   graph.Build("pnnx_input_0", "pnnx_output_0");
 
@@ -103,4 +104,14 @@ int main(int argc, char* argv[]) {
     printf("class with max prob is %f index %d\n", max_prob, max_index);
   }
   return 0;
+}
+
+void test_out() {
+    std::cout << "pybind11 hello world!" << std::endl;
+}
+
+PYBIND11_MODULE(pykuiper, m) {
+    //def( "给python调用方法名"， &实际操作的函数， "函数功能说明" ). 其中函数功能说明为可选
+    m.def("test_pybind", &test_pybind);
+    m.def("test_out", &test_out);
 }
